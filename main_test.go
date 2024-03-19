@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -21,7 +22,7 @@ func TestMainHandlerWhenOk(t *testing.T) {
 
 	answer := responseRecorder.Body
 
-	require.Equal(t, status, statusExpected)
+	require.Equal(t, statusExpected, status)
 	assert.NotEmpty(t, answer)
 }
 
@@ -38,7 +39,7 @@ func TestMainHandlerWhenMissingCount(t *testing.T) {
 	answer := responseRecorder.Body.String()
 	answerContains := "count missing"
 
-	require.Equal(t, status, statusExpected)
+	require.Equal(t, statusExpected, status)
 	assert.Contains(t, answer, answerContains)
 }
 
@@ -55,12 +56,12 @@ func TestMainHandlerWhenWrongCount(t *testing.T) {
 	answer := responseRecorder.Body.String()
 	answerContains := "wrong count value"
 
-	require.Equal(t, status, statusExpected)
+	require.Equal(t, statusExpected, status)
 	assert.Contains(t, answer, answerContains)
 }
 
 func TestMainHandlerWhenWrongCity(t *testing.T) {
-	req := httptest.NewRequest("GET", "/cafe?count=2&city=paris", nil)
+	req := httptest.NewRequest("GET", "/cafe?count=2&city=UnExistCity", nil)
 
 	responseRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(mainHandle)
@@ -72,13 +73,14 @@ func TestMainHandlerWhenWrongCity(t *testing.T) {
 	answer := responseRecorder.Body.String()
 	answerContains := "wrong city value"
 
-	require.Equal(t, status, statusExpected)
+	require.Equal(t, statusExpected, status)
 	assert.Contains(t, answer, answerContains)
 }
 
 func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
-	totalCount := 4
-	req := httptest.NewRequest("GET", "/cafe?count=10&city=moscow", nil)
+	totalCount := len(cafeList["moscow"])
+	countMoreTotal := strconv.Itoa(totalCount + 10)
+	req := httptest.NewRequest("GET", "/cafe?count="+countMoreTotal+"&city=moscow", nil)
 
 	responseRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(mainHandle)
@@ -91,6 +93,6 @@ func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
 	list := strings.Split(answer, ",")
 	countExpected := totalCount
 
-	require.Equal(t, status, statusExpected)
+	require.Equal(t, statusExpected, status)
 	assert.Len(t, list, countExpected)
 }
