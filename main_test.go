@@ -89,9 +89,8 @@ func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
 
 	answer := responseRecorder.Body.String()
 	list := strings.Split(answer, ",")
-	count := len(list)
 	countExpected := totalCount
 
 	require.Equal(t, status, statusExpected)
-	assert.Equal(t, count, countExpected)
+	assert.Len(t, list, countExpected)
 }
